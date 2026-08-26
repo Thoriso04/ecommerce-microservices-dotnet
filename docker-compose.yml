@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   consul:
     image: hashicorp/consul:1.19
@@ -40,28 +38,36 @@ services:
     volumes: ["order_db_data:/var/lib/postgresql/data"]
 
   user-service:
-    build: ./UserService/UserService
+    build:
+      context: ./UserService
+      dockerfile: Dockerfile
     depends_on: [user-db, consul, seq]
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports: ["5001:8080"]
 
   product-service:
-    build: ./ProductService/ProductService
+    build:
+      context: ./ProductService/ProductService
+      dockerfile: Dockerfile
     depends_on: [product-db, consul, seq]
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports: ["5002:8080"]
 
   order-service:
-    build: ./OrderService/OrderService
+    build:
+      context: ./OrderService/OrderService
+      dockerfile: Dockerfile
     depends_on: [order-db, consul, seq, product-service]
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports: ["5003:8080"]
 
   api-gateway:
-    build: ./ApiGateway/ApiGateway
+    build:
+      context: ./ApiGateway/ApiGateway
+      dockerfile: Dockerfile
     depends_on: [user-service, product-service, order-service, consul]
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
