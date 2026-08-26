@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  consul:
+    image: hashicorp/consul:1.19
+    ports: ["8500:8500"]
+    command: agent -dev -client=0.0.0.0
+
+  seq:
+    image: datalust/seq:latest
+    environment:
+      - ACCEPT_EULA=Y
+    ports: ["5341:5341", "8081:80"]
+
+  user-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: userdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: ["5433:5432"]
+    volumes: ["user_db_data:/var/lib/postgresql/data"]
+
+  product-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: productdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: ["5434:5432"]
+    volumes: ["product_db_data:/var/lib/postgresql/data"]
+
+  order-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: orderdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: ["5435:5432"]
+    volumes: ["order_db_data:/var/lib/postgresql/data"]
+
+  user-service:
+    build: ./UserService/UserService
+    depends_on: [user-db, consul, seq]
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports: ["5001:8080"]
+
+  product-service:
+    build: ./ProductService/ProductService
+    depends_on: [product-db, consul, seq]
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports: ["5002:8080"]
+
+  order-service:
+    build: ./OrderService/OrderService
+    depends_on: [order-db, consul, seq, product-service]
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports: ["5003:8080"]
+
+  api-gateway:
+    build: ./ApiGateway/ApiGateway
+    depends_on: [user-service, product-service, order-service, consul]
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports: ["5000:8080"]
+
+volumes:
+  user_db_data:
+  product_db_data:
+  order_db_data:
