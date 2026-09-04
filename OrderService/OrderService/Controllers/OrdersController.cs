@@ -19,7 +19,9 @@ public class OrdersController : ControllerBase
 
     public OrdersController(OrderDbContext db, ProductServiceClient productClient, ILogger<OrdersController> logger)
     {
-        _db = db; _productClient = productClient; _logger = logger;
+        _db = db;
+        _productClient = productClient;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -30,16 +32,21 @@ public class OrdersController : ControllerBase
         var quantity = item?.Quantity ?? req.Quantity;
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub")!.Value);
 
-        var product = await _productClient.GetProductAsync(productId);
+        var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+        var product = await _productClient.GetProductAsync(productId, token);
         if (product == null)
         {
             _logger.LogWarning("Order creation failed: product {ProductId} not found", productId);
             return BadRequest(new { message = "Product not found or Product Service unavailable" });
         }
 
-        var reserved = await _productClient.ReserveStockAsync(productId, quantity);
+        var reserved = await _productClient.ReserveStockAsync(productId, quantity, token);
         if (!reserved)
+        {
+            _logger.LogWarning("Order creation failed: could not reserve stock for product {ProductId}", req.ProductId);
             return BadRequest(new { message = "Could not reserve stock (insufficient quantity or service error)" });
+        }
 
         var order = new Order
         {
@@ -50,6 +57,7 @@ public class OrdersController : ControllerBase
             TotalPrice = product.Price * quantity,
             Status = "Confirmed"
         };
+
         _db.Orders.Add(order);
         await _db.SaveChangesAsync();
 
@@ -62,6 +70,13 @@ public class OrdersController : ControllerBase
     {
         var o = await _db.Orders.FindAsync(id);
         return o == null ? NotFound() : Ok(o);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetMine()
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub")!.Value);
+        return Ok(await _db.Orders.Where(o => o.UserId == userId).ToListAsync());
     }
 
     [HttpGet("user/{userId}")]
