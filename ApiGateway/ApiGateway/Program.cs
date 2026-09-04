@@ -13,7 +13,7 @@ builder.Host.UseSerilog((ctx, cfg) => cfg
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 
 builder.Services.AddOcelot(builder.Configuration)
-    .AddConsul();
+    .AddConsul<DockerConsulServiceBuilder>();
 
 var app = builder.Build();
 

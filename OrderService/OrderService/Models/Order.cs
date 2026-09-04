@@ -12,4 +12,11 @@ public class Order
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
-public record CreateOrderRequest(Guid ProductId, int Quantity);
+public class CreateOrderRequest
+{
+    public Guid ProductId { get; set; }
+    public int Quantity { get; set; }
+    public List<OrderItemRequest> Items { get; set; } = [];
+}
+
+public record OrderItemRequest(Guid ProductId, int Quantity, decimal UnitPrice);

@@ -10,5 +10,5 @@ public class Product
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 
-public record ProductRequest(string Name, string Description, decimal Price, int StockQuantity);
+public record ProductRequest(string Name, string Description, decimal Price, int StockQuantity, int? Stock = null);
 public record StockAdjustRequest(int Quantity);

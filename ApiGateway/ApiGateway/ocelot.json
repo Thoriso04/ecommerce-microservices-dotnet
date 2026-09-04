@@ -15,11 +15,27 @@
       }
     },
     {
+      "UpstreamPathTemplate": "/api/products",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/products",
+      "DownstreamScheme": "http",
+      "ServiceName": "product-service",
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
       "UpstreamPathTemplate": "/api/products/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "DownstreamPathTemplate": "/api/products/{everything}",
       "DownstreamScheme": "http",
       "ServiceName": "product-service",
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/orders",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "DownstreamPathTemplate": "/api/orders",
+      "DownstreamScheme": "http",
+      "ServiceName": "order-service",
       "LoadBalancerOptions": { "Type": "RoundRobin" }
     },
     {
@@ -40,4 +56,5 @@
     "PollingInterval": 2000
   }
 }
+
 }

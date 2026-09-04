@@ -25,16 +25,19 @@ public class OrdersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateOrderRequest req)
     {
+        var item = req.Items.FirstOrDefault();
+        var productId = item?.ProductId ?? req.ProductId;
+        var quantity = item?.Quantity ?? req.Quantity;
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub")!.Value);
 
-        var product = await _productClient.GetProductAsync(req.ProductId);
+        var product = await _productClient.GetProductAsync(productId);
         if (product == null)
         {
-            _logger.LogWarning("Order creation failed: product {ProductId} not found", req.ProductId);
+            _logger.LogWarning("Order creation failed: product {ProductId} not found", productId);
             return BadRequest(new { message = "Product not found or Product Service unavailable" });
         }
 
-        var reserved = await _productClient.ReserveStockAsync(req.ProductId, req.Quantity);
+        var reserved = await _productClient.ReserveStockAsync(productId, quantity);
         if (!reserved)
             return BadRequest(new { message = "Could not reserve stock (insufficient quantity or service error)" });
 
@@ -43,8 +46,8 @@ public class OrdersController : ControllerBase
             UserId = userId,
             ProductId = product.Id,
             ProductName = product.Name,
-            Quantity = req.Quantity,
-            TotalPrice = product.Price * req.Quantity,
+            Quantity = quantity,
+            TotalPrice = product.Price * quantity,
             Status = "Confirmed"
         };
         _db.Orders.Add(order);
