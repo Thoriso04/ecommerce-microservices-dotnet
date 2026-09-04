@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Serilog centralized logging
 builder.Host.UseSerilog((ctx, cfg) => cfg
     .WriteTo.Console()
-    .WriteTo.Seq(ctx.Configuration["Seq:Url"] ?? "http://localhost:5341")
+    .WriteTo.Seq(ctx.Configuration["Seq:Url"] ?? "http://seq:5341")
     .Enrich.WithProperty("Service", "UserService"));
 
 builder.Services.AddControllers();
@@ -58,16 +58,21 @@ app.MapControllers();
 app.MapHealthChecks("/health");
 
 // Register with Consul on startup
-var consulClient = new ConsulClient(c => c.Address = new Uri(builder.Configuration["Consul:Address"] ?? "http://localhost:8500"));
+var consulAddress = builder.Configuration["Consul:Address"] ?? "http://consul:8500";
+var consulClient = new ConsulClient(c => c.Address = new Uri(consulAddress));
+
+var serviceHost = builder.Configuration["Service:Host"] ?? "user-service";
+var servicePort = int.Parse(builder.Configuration["Service:Port"] ?? "8080");
+
 var registration = new AgentServiceRegistration
 {
     ID = "user-service-1",
     Name = "user-service",
-    Address = builder.Configuration["Service:Host"] ?? "localhost",
-    Port = int.Parse(builder.Configuration["Service:Port"] ?? "5001"),
+    Address = serviceHost,
+    Port = servicePort,
     Check = new AgentServiceCheck
     {
-        HTTP = $"http://{builder.Configuration["Service:Host"] ?? "localhost"}:{builder.Configuration["Service:Port"] ?? "5001"}/health",
+        HTTP = $"http://{serviceHost}:{servicePort}/health",
         Interval = TimeSpan.FromSeconds(10),
         Timeout = TimeSpan.FromSeconds(5)
     }

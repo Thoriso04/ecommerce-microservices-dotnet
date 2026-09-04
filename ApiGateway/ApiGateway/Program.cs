@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog((ctx, cfg) => cfg
     .WriteTo.Console()
-    .WriteTo.Seq(ctx.Configuration["Seq:Url"] ?? "http://localhost:5341")
+    .WriteTo.Seq(ctx.Configuration["Seq:Url"] ?? "http://seq:5341")
     .Enrich.WithProperty("Service", "ApiGateway"));
 
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);

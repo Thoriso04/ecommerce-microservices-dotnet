@@ -8,6 +8,7 @@ services:
     image: datalust/seq:latest
     environment:
       - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=Y
     ports: ["5341:5341", "8081:80"]
 
   user-db:
@@ -18,6 +19,11 @@ services:
       POSTGRES_PASSWORD: postgres
     ports: ["5433:5432"]
     volumes: ["user_db_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d userdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   product-db:
     image: postgres:16
@@ -27,6 +33,11 @@ services:
       POSTGRES_PASSWORD: postgres
     ports: ["5434:5432"]
     volumes: ["product_db_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d productdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   order-db:
     image: postgres:16
@@ -36,12 +47,23 @@ services:
       POSTGRES_PASSWORD: postgres
     ports: ["5435:5432"]
     volumes: ["order_db_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d orderdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   user-service:
     build:
       context: ./UserService
       dockerfile: Dockerfile
-    depends_on: [user-db, consul, seq]
+    depends_on:
+      user-db:
+        condition: service_healthy
+      consul:
+        condition: service_started
+      seq:
+        condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports: ["5001:8080"]
@@ -50,7 +72,13 @@ services:
     build:
       context: ./ProductService/ProductService
       dockerfile: Dockerfile
-    depends_on: [product-db, consul, seq]
+    depends_on:
+      product-db:
+        condition: service_healthy
+      consul:
+        condition: service_started
+      seq:
+        condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports: ["5002:8080"]
@@ -59,7 +87,15 @@ services:
     build:
       context: ./OrderService/OrderService
       dockerfile: Dockerfile
-    depends_on: [order-db, consul, seq, product-service]
+    depends_on:
+      order-db:
+        condition: service_healthy
+      consul:
+        condition: service_started
+      seq:
+        condition: service_started
+      product-service:
+        condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports: ["5003:8080"]
@@ -68,7 +104,15 @@ services:
     build:
       context: ./ApiGateway/ApiGateway
       dockerfile: Dockerfile
-    depends_on: [user-service, product-service, order-service, consul]
+    depends_on:
+      user-service:
+        condition: service_started
+      product-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      consul:
+        condition: service_started
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     ports: ["5000:8080"]
