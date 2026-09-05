@@ -2,83 +2,375 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>E-Commerce Microservices Demo Client</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E-Commerce Management Client</title>
 <style>
-  body { font-family: Arial, sans-serif; max-width: 900px; margin: 30px auto; background: #f4f4f4; color: #222; }
-  h1 { color: #2c3e50; }
-  h2 { color: #34495e; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
-  section { background: white; padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  input { padding: 6px; margin: 4px 0; width: 250px; display: block; }
-  button { padding: 8px 16px; margin-top: 8px; background: #2980b9; color: white; border: none; border-radius: 4px; cursor: pointer; }
-  button:hover { background: #1c5980; }
-  pre { background: #1e1e1e; color: #b5f4a5; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
-  .status { font-weight: bold; margin-top: 6px; }
-  .ok { color: green; }
-  .err { color: red; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  th, td { text-align: left; padding: 6px; border-bottom: 1px solid #ddd; }
+  html {
+    scroll-behavior: smooth;
+  }
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    max-width: 1000px; 
+    margin: 40px auto; 
+    background: #f8fafc; 
+    color: #1e293b; 
+    line-height: 1.5;
+  }
+  h1 { 
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a; 
+    margin-bottom: 24px;
+  }
+  h2 { 
+    font-size: 18px;
+    font-weight: 600;
+    color: #334155; 
+    border-bottom: 1px solid #e2e8f0; 
+    padding-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+  h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #475569;
+    margin-top: 20px;
+    margin-bottom: 12px;
+  }
+  section { 
+    background: #ffffff; 
+    padding: 24px; 
+    margin-bottom: 24px; 
+    border-radius: 6px; 
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+  }
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 4px;
+  }
+  input { 
+    padding: 8px 12px; 
+    margin-bottom: 12px; 
+    width: 280px; 
+    display: block; 
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 14px;
+    background: #ffffff;
+    color: #0f172a;
+  }
+  input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  }
+  button { 
+    padding: 8px 16px; 
+    background: #2563eb; 
+    color: #ffffff; 
+    border: none; 
+    border-radius: 4px; 
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer; 
+  }
+  button:hover { 
+    background: #1d4ed8; 
+  }
+  button.secondary {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+  }
+  button.secondary:hover {
+    background: #e2e8f0;
+  }
+  button.danger {
+    background: #ef4444;
+    color: #ffffff;
+  }
+  button.danger:hover {
+    background: #dc2626;
+  }
+  button.sm {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+  pre { 
+    background: #0f172a; 
+    color: #38bdf8; 
+    padding: 12px 16px; 
+    border-radius: 4px; 
+    overflow-x: auto; 
+    font-size: 13px; 
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    margin-top: 8px;
+  }
+  .status { 
+    font-size: 13px;
+    font-weight: 500; 
+    margin-top: 8px; 
+  }
+  .ok { color: #16a34a; }
+  .err { color: #dc2626; }
+  
+  .table-container {
+    overflow-x: auto;
+    margin-top: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+  }
+  table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    font-size: 14px;
+    background: #ffffff;
+  }
+  th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  td { 
+    text-align: left; 
+    padding: 10px 12px; 
+    border-bottom: 1px solid #f1f5f9; 
+    color: #334155;
+  }
+  tr:last-child td {
+    border-bottom: none;
+  }
+  tr:hover td {
+    background: #f8fafc;
+  }
+  .mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    color: #64748b;
+  }
+  .form-group-inline {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .cart-qty-input {
+    width: 60px !important;
+    margin-bottom: 0 !important;
+    padding: 4px 8px !important;
+    display: inline-block !important;
+  }
 </style>
 </head>
 <body>
 
-<h1>E-Commerce Microservices — Demo Client</h1>
-<p>This page talks only to the API Gateway at <code>http://localhost:5000</code>, which routes to User, Product, and Order services.</p>
+<h1>E-Commerce Microservices Client</h1>
 
-<section>
+<section id="sec-register">
   <h2>1. Register</h2>
+  <label for="reg-username">Username</label>
   <input id="reg-username" placeholder="Username" value="alice">
+  <label for="reg-email">Email</label>
   <input id="reg-email" placeholder="Email" value="alice@test.com">
+  <label for="reg-password">Password</label>
   <input id="reg-password" type="password" placeholder="Password" value="Passw0rd!">
   <button onclick="register()">Register</button>
   <div id="reg-status" class="status"></div>
 </section>
 
-<section>
+<section id="sec-login">
   <h2>2. Login</h2>
+  <label for="login-username">Username</label>
   <input id="login-username" placeholder="Username" value="alice">
+  <label for="login-password">Password</label>
   <input id="login-password" type="password" placeholder="Password" value="Passw0rd!">
   <button onclick="login()">Login</button>
   <div id="login-status" class="status"></div>
-  <p><strong>Current token:</strong></p>
+  <p style="margin-top:12px; margin-bottom:4px; font-size:13px; font-weight:500;">Active Token</p>
   <pre id="token-display">(not logged in)</pre>
 </section>
 
-<section>
-  <h2>3. Products</h2>
-  <button onclick="loadProducts()">Refresh Product List</button>
-  <table id="product-table">
-    <thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Stock</th></tr></thead>
-    <tbody></tbody>
-  </table>
+<section id="sec-products">
+  <h2>3. Product Catalog</h2>
+  <button class="secondary" onclick="loadProducts()">Refresh Catalog</button>
+  
+  <div class="table-container">
+    <table id="product-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Stock</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="5" style="color: #94a3b8; text-align: center;">Click Refresh Catalog to fetch products.</td></tr>
+      </tbody>
+    </table>
+  </div>
 
-  <h3>Create Product</h3>
-  <input id="prod-name" placeholder="Name" value="Demo Headphones">
-  <input id="prod-desc" placeholder="Description" value="Noise-cancelling">
-  <input id="prod-price" placeholder="Price" value="49.99">
-  <input id="prod-stock" placeholder="Stock Quantity" value="20">
+  <h3>Add New Product</h3>
+  <div class="form-group-inline">
+    <div>
+      <label for="prod-name">Name</label>
+      <input id="prod-name" placeholder="Name" value="Demo Headphones">
+      <label for="prod-desc">Description</label>
+      <input id="prod-desc" placeholder="Description" value="Noise-cancelling">
+    </div>
+    <div>
+      <label for="prod-price">Price</label>
+      <input id="prod-price" placeholder="Price" value="49.99">
+      <label for="prod-stock">Stock Quantity</label>
+      <input id="prod-stock" placeholder="Stock Quantity" value="20">
+    </div>
+  </div>
   <button onclick="createProduct()">Create Product</button>
   <div id="prod-status" class="status"></div>
 </section>
 
-<section>
-  <h2>4. Create Order</h2>
-  <input id="order-productid" placeholder="Product ID (copy from table above)">
-  <input id="order-qty" placeholder="Quantity" value="1">
-  <button onclick="createOrder()">Place Order</button>
+<section id="sec-orders">
+  <h2>4. Create Order (Cart)</h2>
+  <div class="table-container">
+    <table id="cart-table">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="5" style="color: #94a3b8; text-align: center;">No items added to cart. Click "Add to Order" from catalog.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+    <div>
+      <strong>Cart Total: </strong><span id="cart-total-display">$0.00</span>
+    </div>
+    <button id="btn-place-order" onclick="placeOrder()" disabled>Place Order</button>
+  </div>
   <div id="order-status" class="status"></div>
-  <pre id="order-result"></pre>
 </section>
 
-<section>
-  <h2>5. My Orders</h2>
-  <button onclick="loadOrders()">Load My Orders</button>
-  <pre id="orders-result"></pre>
+<section id="sec-my-orders">
+  <h2>5. Order History</h2>
+  <button class="secondary" onclick="loadOrders()">Fetch My Orders</button>
+  <div id="orders-history-container"></div>
 </section>
 
 <script>
 const GATEWAY = "http://localhost:5000";
 let token = null;
 let userId = null;
+
+// Cart State: Array of { productId, name, price, quantity }
+let cart = [];
+
+function formatDate(dateString) {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function createOrderCardHtml(order) {
+  return `
+    <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; margin-top: 12px; background: #ffffff;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 12px;">
+        <span style="font-weight: 600; color: #0f172a; font-size: 15px;">${order.productName || 'Order Item'}</span>
+        <span style="font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 4px; background: #dcfce7; color: #166534;">${order.status}</span>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 13px; color: #475569;">
+        <div>
+          <span style="display: block; color: #94a3b8; font-size: 11px; text-transform: uppercase;">Quantity</span>
+          <strong>${order.quantity}</strong>
+        </div>
+        <div>
+          <span style="display: block; color: #94a3b8; font-size: 11px; text-transform: uppercase;">Total Price</span>
+          <strong>$${Number(order.totalPrice).toFixed(2)}</strong>
+        </div>
+        <div>
+          <span style="display: block; color: #94a3b8; font-size: 11px; text-transform: uppercase;">Created Date</span>
+          <strong>${formatDate(order.createdAt)}</strong>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addToCart(id, name, price) {
+  const existingIndex = cart.findIndex(item => item.productId === id);
+  if (existingIndex > -1) {
+    cart[existingIndex].quantity += 1;
+  } else {
+    cart.push({ productId: id, name: name, price: parseFloat(price), quantity: 1 });
+  }
+  renderCart();
+  document.getElementById('sec-orders').scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateCartQuantity(id, newQty) {
+  const qty = parseInt(newQty);
+  if (isNaN(qty) || qty <= 0) {
+    removeFromCart(id);
+    return;
+  }
+  const item = cart.find(item => item.productId === id);
+  if (item) {
+    item.quantity = qty;
+  }
+  renderCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(item => item.productId !== id);
+  renderCart();
+}
+
+function renderCart() {
+  const tbody = document.querySelector('#cart-table tbody');
+  const totalDisplay = document.getElementById('cart-total-display');
+  const btnPlaceOrder = document.getElementById('btn-place-order');
+  tbody.innerHTML = '';
+
+  if (cart.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" style="color: #94a3b8; text-align: center;">No items added to cart. Click "Add to Order" from catalog.</td></tr>`;
+    totalDisplay.textContent = '$0.00';
+    btnPlaceOrder.disabled = true;
+    return;
+  }
+
+  let total = 0;
+  cart.forEach(item => {
+    const subtotal = item.price * item.quantity;
+    total += subtotal;
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td><strong>${item.name}</strong></td>
+      <td>$${item.price.toFixed(2)}</td>
+      <td>
+        <input type="number" min="1" value="${item.quantity}" class="cart-qty-input" onchange="updateCartQuantity('${item.productId}', this.value)">
+      </td>
+      <td>$${subtotal.toFixed(2)}</td>
+      <td><button class="danger sm" onclick="removeFromCart('${item.productId}')">Delete</button></td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  totalDisplay.textContent = `$${total.toFixed(2)}`;
+  btnPlaceOrder.disabled = false;
+}
 
 async function register() {
   const body = {
@@ -93,16 +385,16 @@ async function register() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    const data = await res.json();
     if (res.ok) {
-      statusEl.textContent = `Registered! User ID: ${data.id}`;
+      const data = await res.json();
+      statusEl.textContent = `Registered successfully. User ID: ${data.id}`;
       statusEl.className = 'status ok';
     } else {
-      statusEl.textContent = `Error: ${data.message || res.status}`;
+      statusEl.textContent = `Error ${res.status}`;
       statusEl.className = 'status err';
     }
   } catch (e) {
-    statusEl.textContent = `Request failed: ${e.message}`;
+    statusEl.textContent = `Request failed: Connection error`;
     statusEl.className = 'status err';
   }
 }
@@ -119,39 +411,55 @@ async function login() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
-    const data = await res.json();
     if (res.ok) {
+      const data = await res.json();
       token = data.token;
       userId = data.userId;
-      statusEl.textContent = `Logged in as ${data.username}`;
+      statusEl.textContent = `Authenticated as ${data.username}`;
       statusEl.className = 'status ok';
       document.getElementById('token-display').textContent = token;
+      loadOrders();
     } else {
-      statusEl.textContent = `Error: ${data.message || res.status}`;
+      statusEl.textContent = `Error ${res.status}`;
       statusEl.className = 'status err';
     }
   } catch (e) {
-    statusEl.textContent = `Request failed: ${e.message}`;
+    statusEl.textContent = `Request failed: Connection error`;
     statusEl.className = 'status err';
   }
 }
 
 async function loadProducts() {
-  const res = await fetch(`${GATEWAY}/api/products`, {
-    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-  });
   const tbody = document.querySelector('#product-table tbody');
-  tbody.innerHTML = '';
-  if (!res.ok) {
-    tbody.innerHTML = `<tr><td colspan="4" style="color:red">Error ${res.status} — are you logged in?</td></tr>`;
-    return;
+  try {
+    const res = await fetch(`${GATEWAY}/api/products`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+    });
+    tbody.innerHTML = '';
+    if (!res.ok) {
+      tbody.innerHTML = `<tr><td colspan="5" class="err">Error ${res.status}</td></tr>`;
+      return;
+    }
+    const products = await res.json();
+    if (products.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" style="color: #94a3b8; text-align: center;">No products available.</td></tr>`;
+      return;
+    }
+    products.forEach(p => {
+      const row = document.createElement('tr');
+      const safeName = p.name.replace(/'/g, "\\'");
+      row.innerHTML = `
+        <td class="mono">${p.id}</td>
+        <td><strong>${p.name}</strong></td>
+        <td>$${Number(p.price).toFixed(2)}</td>
+        <td>${p.stockQuantity}</td>
+        <td><button class="secondary sm" onclick="addToCart('${p.id}', '${safeName}', ${p.price})">Add to Order</button></td>
+      `;
+      tbody.appendChild(row);
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="5" class="err">Request failed: Connection error</td></tr>`;
   }
-  const products = await res.json();
-  products.forEach(p => {
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${p.id}</td><td>${p.name}</td><td>$${p.price}</td><td>${p.stockQuantity}</td>`;
-    tbody.appendChild(row);
-  });
 }
 
 async function createProduct() {
@@ -168,60 +476,95 @@ async function createProduct() {
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
       body: JSON.stringify(body)
     });
-    const data = await res.json();
     if (res.ok) {
-      statusEl.textContent = `Created! Product ID: ${data.id}`;
+      const data = await res.json();
+      statusEl.textContent = `Product created successfully. ID: ${data.id}`;
       statusEl.className = 'status ok';
       loadProducts();
-    } else {
-      statusEl.textContent = `Error: ${JSON.stringify(data)}`;
-      statusEl.className = 'status err';
-    }
-  } catch (e) {
-    statusEl.textContent = `Request failed: ${e.message}`;
-    statusEl.className = 'status err';
-  }
-}
-
-async function createOrder() {
-  const body = {
-    productId: document.getElementById('order-productid').value,
-    quantity: parseInt(document.getElementById('order-qty').value)
-  };
-  const statusEl = document.getElementById('order-status');
-  const resultEl = document.getElementById('order-result');
-  try {
-    const res = await fetch(`${GATEWAY}/api/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (res.ok) {
-      statusEl.textContent = 'Order created successfully!';
-      statusEl.className = 'status ok';
     } else {
       statusEl.textContent = `Error ${res.status}`;
       statusEl.className = 'status err';
     }
-    resultEl.textContent = JSON.stringify(data, null, 2);
   } catch (e) {
-    statusEl.textContent = `Request failed: ${e.message}`;
+    statusEl.textContent = `Request failed: Connection error`;
     statusEl.className = 'status err';
   }
 }
 
+async function placeOrder() {
+  const statusEl = document.getElementById('order-status');
+  if (cart.length === 0) return;
+
+  statusEl.textContent = 'Processing order...';
+  statusEl.className = 'status';
+
+  let hasError = false;
+  let lastErrorStatus = '';
+
+  for (const item of cart) {
+    const body = {
+      productId: item.productId,
+      quantity: item.quantity
+    };
+    try {
+      const res = await fetch(`${GATEWAY}/api/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        hasError = true;
+        lastErrorStatus = `Error ${res.status}`;
+        break;
+      }
+    } catch (e) {
+      hasError = true;
+      lastErrorStatus = 'Request failed: Connection error';
+      break;
+    }
+  }
+
+  if (hasError) {
+    statusEl.textContent = lastErrorStatus;
+    statusEl.className = 'status err';
+  } else {
+    statusEl.textContent = 'Order(s) placed successfully.';
+    statusEl.className = 'status ok';
+    
+    // Clear cart and refresh catalog & history
+    cart = [];
+    renderCart();
+    loadProducts();
+    loadOrders();
+    
+    // Smooth scroll down to order history
+    document.getElementById('sec-my-orders').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
 async function loadOrders() {
-  const resultEl = document.getElementById('orders-result');
+  const historyEl = document.getElementById('orders-history-container');
   if (!userId) {
-    resultEl.textContent = 'Please login first.';
+    historyEl.innerHTML = '<p style="font-size: 13px; color: #dc2626; margin-top: 12px;">Authentication required.</p>';
     return;
   }
-  const res = await fetch(`${GATEWAY}/api/orders/user/${userId}`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  const data = await res.json();
-  resultEl.textContent = JSON.stringify(data, null, 2);
+  try {
+    const res = await fetch(`${GATEWAY}/api/orders/user/${userId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const orders = await res.json();
+      if (orders.length === 0) {
+        historyEl.innerHTML = '<p style="font-size: 13px; color: #64748b; margin-top: 12px;">No orders found.</p>';
+        return;
+      }
+      historyEl.innerHTML = orders.map(order => createOrderCardHtml(order)).join('');
+    } else {
+      historyEl.innerHTML = `<p style="font-size: 13px; color: #dc2626; margin-top: 12px;">Error ${res.status}</p>`;
+    }
+  } catch (e) {
+    historyEl.innerHTML = '<p style="font-size: 13px; color: #dc2626; margin-top: 12px;">Request failed: Connection error</p>';
+  }
 }
 </script>
 
