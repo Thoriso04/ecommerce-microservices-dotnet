@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>E-Commerce Microservices Demo Client</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 900px; margin: 30px auto; background: #f4f4f4; color: #222; }
+  h1 { color: #2c3e50; }
+  h2 { color: #34495e; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
+  section { background: white; padding: 15px 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  input { padding: 6px; margin: 4px 0; width: 250px; display: block; }
+  button { padding: 8px 16px; margin-top: 8px; background: #2980b9; color: white; border: none; border-radius: 4px; cursor: pointer; }
+  button:hover { background: #1c5980; }
+  pre { background: #1e1e1e; color: #b5f4a5; padding: 10px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+  .status { font-weight: bold; margin-top: 6px; }
+  .ok { color: green; }
+  .err { color: red; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align: left; padding: 6px; border-bottom: 1px solid #ddd; }
+</style>
+</head>
+<body>
+
+<h1>E-Commerce Microservices — Demo Client</h1>
+<p>This page talks only to the API Gateway at <code>http://localhost:5000</code>, which routes to User, Product, and Order services.</p>
+
+<section>
+  <h2>1. Register</h2>
+  <input id="reg-username" placeholder="Username" value="alice">
+  <input id="reg-email" placeholder="Email" value="alice@test.com">
+  <input id="reg-password" type="password" placeholder="Password" value="Passw0rd!">
+  <button onclick="register()">Register</button>
+  <div id="reg-status" class="status"></div>
+</section>
+
+<section>
+  <h2>2. Login</h2>
+  <input id="login-username" placeholder="Username" value="alice">
+  <input id="login-password" type="password" placeholder="Password" value="Passw0rd!">
+  <button onclick="login()">Login</button>
+  <div id="login-status" class="status"></div>
+  <p><strong>Current token:</strong></p>
+  <pre id="token-display">(not logged in)</pre>
+</section>
+
+<section>
+  <h2>3. Products</h2>
+  <button onclick="loadProducts()">Refresh Product List</button>
+  <table id="product-table">
+    <thead><tr><th>ID</th><th>Name</th><th>Price</th><th>Stock</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <h3>Create Product</h3>
+  <input id="prod-name" placeholder="Name" value="Demo Headphones">
+  <input id="prod-desc" placeholder="Description" value="Noise-cancelling">
+  <input id="prod-price" placeholder="Price" value="49.99">
+  <input id="prod-stock" placeholder="Stock Quantity" value="20">
+  <button onclick="createProduct()">Create Product</button>
+  <div id="prod-status" class="status"></div>
+</section>
+
+<section>
+  <h2>4. Create Order</h2>
+  <input id="order-productid" placeholder="Product ID (copy from table above)">
+  <input id="order-qty" placeholder="Quantity" value="1">
+  <button onclick="createOrder()">Place Order</button>
+  <div id="order-status" class="status"></div>
+  <pre id="order-result"></pre>
+</section>
+
+<section>
+  <h2>5. My Orders</h2>
+  <button onclick="loadOrders()">Load My Orders</button>
+  <pre id="orders-result"></pre>
+</section>
+
+<script>
+const GATEWAY = "http://localhost:5000";
+let token = null;
+let userId = null;
+
+async function register() {
+  const body = {
+    username: document.getElementById('reg-username').value,
+    email: document.getElementById('reg-email').value,
+    password: document.getElementById('reg-password').value
+  };
+  const statusEl = document.getElementById('reg-status');
+  try {
+    const res = await fetch(`${GATEWAY}/api/users/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      statusEl.textContent = `Registered! User ID: ${data.id}`;
+      statusEl.className = 'status ok';
+    } else {
+      statusEl.textContent = `Error: ${data.message || res.status}`;
+      statusEl.className = 'status err';
+    }
+  } catch (e) {
+    statusEl.textContent = `Request failed: ${e.message}`;
+    statusEl.className = 'status err';
+  }
+}
+
+async function login() {
+  const body = {
+    username: document.getElementById('login-username').value,
+    password: document.getElementById('login-password').value
+  };
+  const statusEl = document.getElementById('login-status');
+  try {
+    const res = await fetch(`${GATEWAY}/api/users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      token = data.token;
+      userId = data.userId;
+      statusEl.textContent = `Logged in as ${data.username}`;
+      statusEl.className = 'status ok';
+      document.getElementById('token-display').textContent = token;
+    } else {
+      statusEl.textContent = `Error: ${data.message || res.status}`;
+      statusEl.className = 'status err';
+    }
+  } catch (e) {
+    statusEl.textContent = `Request failed: ${e.message}`;
+    statusEl.className = 'status err';
+  }
+}
+
+async function loadProducts() {
+  const res = await fetch(`${GATEWAY}/api/products`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+  });
+  const tbody = document.querySelector('#product-table tbody');
+  tbody.innerHTML = '';
+  if (!res.ok) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:red">Error ${res.status} — are you logged in?</td></tr>`;
+    return;
+  }
+  const products = await res.json();
+  products.forEach(p => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${p.id}</td><td>${p.name}</td><td>$${p.price}</td><td>${p.stockQuantity}</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+async function createProduct() {
+  const body = {
+    name: document.getElementById('prod-name').value,
+    description: document.getElementById('prod-desc').value,
+    price: parseFloat(document.getElementById('prod-price').value),
+    stockQuantity: parseInt(document.getElementById('prod-stock').value)
+  };
+  const statusEl = document.getElementById('prod-status');
+  try {
+    const res = await fetch(`${GATEWAY}/api/products`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      statusEl.textContent = `Created! Product ID: ${data.id}`;
+      statusEl.className = 'status ok';
+      loadProducts();
+    } else {
+      statusEl.textContent = `Error: ${JSON.stringify(data)}`;
+      statusEl.className = 'status err';
+    }
+  } catch (e) {
+    statusEl.textContent = `Request failed: ${e.message}`;
+    statusEl.className = 'status err';
+  }
+}
+
+async function createOrder() {
+  const body = {
+    productId: document.getElementById('order-productid').value,
+    quantity: parseInt(document.getElementById('order-qty').value)
+  };
+  const statusEl = document.getElementById('order-status');
+  const resultEl = document.getElementById('order-result');
+  try {
+    const res = await fetch(`${GATEWAY}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (res.ok) {
+      statusEl.textContent = 'Order created successfully!';
+      statusEl.className = 'status ok';
+    } else {
+      statusEl.textContent = `Error ${res.status}`;
+      statusEl.className = 'status err';
+    }
+    resultEl.textContent = JSON.stringify(data, null, 2);
+  } catch (e) {
+    statusEl.textContent = `Request failed: ${e.message}`;
+    statusEl.className = 'status err';
+  }
+}
+
+async function loadOrders() {
+  const resultEl = document.getElementById('orders-result');
+  if (!userId) {
+    resultEl.textContent = 'Please login first.';
+    return;
+  }
+  const res = await fetch(`${GATEWAY}/api/orders/user/${userId}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const data = await res.json();
+  resultEl.textContent = JSON.stringify(data, null, 2);
+}
+</script>
+
+</body>
+</html>
