@@ -7,8 +7,8 @@ services:
   seq:
     image: datalust/seq:latest
     environment:
-      - ACCEPT_EULA=true
-      - SEQ_FIRSTRUN_NOAUTHENTICATION=Y
+      - ACCEPT_EULA=y
+      - SEQ_FIRSTRUN_NOAUTHENTICATION=true
     ports: ["5341:5341", "8081:80"]
 
   user-db:

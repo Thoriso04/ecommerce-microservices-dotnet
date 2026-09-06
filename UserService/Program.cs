@@ -17,6 +17,7 @@ builder.Host.UseSerilog((ctx, cfg) => cfg
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<UserDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("UserDb")));
 
@@ -54,8 +55,11 @@ using (var scope = app.Services.CreateScope())
 app.UseSerilogRequestLogging();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSwagger();
+app.UseSwaggerUI();
 app.MapControllers();
 app.MapHealthChecks("/health");
+
 
 // Register with Consul on startup
 var consulAddress = builder.Configuration["Consul:Address"] ?? "http://consul:8500";
