@@ -117,7 +117,50 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
     ports: ["5000:8080"]
 
+  neo4j:
+    image: neo4j:5.24
+    environment:
+      - NEO4J_AUTH=neo4j/password123
+      - NEO4J_PLUGINS=["apoc"]
+    ports: ["7474:7474", "7687:7687"]
+    volumes: ["neo4j_data:/data"]
+
+  soc-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: socdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: ["5436:5432"]
+    volumes: ["soc_db_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d socdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  soc-event-service:
+    build:
+      context: ./SocEventService/SocEventService
+      dockerfile: Dockerfile
+    depends_on:
+      soc-db:
+        condition: service_healthy
+      neo4j:
+        condition: service_started
+      consul:
+        condition: service_started
+      seq:
+        condition: service_started
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports: ["5004:8080"]
+
 volumes:
   user_db_data:
   product_db_data:
   order_db_data:
+  neo4j_data:
+  soc_db_data:
+
+  

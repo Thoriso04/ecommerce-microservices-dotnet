@@ -59,6 +59,42 @@
       "DownstreamScheme": "http",
       "ServiceName": "order-service",
       "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/events",
+      "UpstreamHttpMethod": [ "GET", "POST" ],
+      "DownstreamPathTemplate": "/api/events",
+      "DownstreamScheme": "http",
+      "ServiceName": "soc-event-service",
+      "LoadBalancerOptions": { "Type": "RoundRobin" }
+    },
+    {
+      "UpstreamPathTemplate": "/api/alerts",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/alerts",
+      "DownstreamScheme": "http",
+      "ServiceName": "soc-event-service"
+    },
+    {
+      "UpstreamPathTemplate": "/api/alerts/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/alerts/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "soc-event-service"
+    },
+    {
+      "UpstreamPathTemplate": "/api/graph/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DownstreamPathTemplate": "/api/graph/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "soc-event-service"
+    },
+    {
+      "UpstreamPathTemplate": "/api/rag/{everything}",
+      "UpstreamHttpMethod": [ "POST" ],
+      "DownstreamPathTemplate": "/api/rag/{everything}",
+      "DownstreamScheme": "http",
+      "ServiceName": "soc-event-service"
     }
   ],
   "GlobalConfiguration": {

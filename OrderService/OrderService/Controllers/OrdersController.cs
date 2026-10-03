@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Ecommerce.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +17,14 @@ public class OrdersController : ControllerBase
     private readonly OrderDbContext _db;
     private readonly ProductServiceClient _productClient;
     private readonly ILogger<OrdersController> _logger;
+    private readonly SecurityEventPublisher _eventPublisher;
 
-    public OrdersController(OrderDbContext db, ProductServiceClient productClient, ILogger<OrdersController> logger)
+    public OrdersController(OrderDbContext db, ProductServiceClient productClient, ILogger<OrdersController> logger, SecurityEventPublisher eventPublisher)
     {
         _db = db;
         _productClient = productClient;
         _logger = logger;
+        _eventPublisher = eventPublisher;
     }
 
     [HttpPost]
@@ -38,6 +41,9 @@ public class OrdersController : ControllerBase
         if (product == null)
         {
             _logger.LogWarning("Order creation failed: product {ProductId} not found", productId);
+            await _eventPublisher.PublishAsync("SERVICE_ERROR", "HIGH", "order-service",
+                $"Order Service could not reach Product Service for product {productId}",
+                userId: userId.ToString());
             return BadRequest(new { message = "Product not found or Product Service unavailable" });
         }
 

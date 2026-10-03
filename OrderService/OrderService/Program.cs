@@ -3,6 +3,7 @@ using Consul;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Ecommerce.Security;
 using OrderService.Data;
 using OrderService.Services;
 using Polly;
@@ -44,6 +45,11 @@ builder.Services.AddHttpClient<ProductServiceClient>(client =>
     .AddPolicyHandler(RetryPolicy())
     .AddPolicyHandler(CircuitBreakerPolicy());
 
+builder.Services.AddHttpClient<SecurityEventPublisher>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:SocEventService"] ?? "http://soc-event-service:8080");
+});
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(opt =>
     {
@@ -75,6 +81,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
+
+app.UseMiddleware<OrderService.Middleware.SecurityEventMiddleware>(); 
 
 var consulAddress = builder.Configuration["Consul:Address"] ?? "http://consul:8500";
 var consulClient = new ConsulClient(c => c.Address = new Uri(consulAddress));

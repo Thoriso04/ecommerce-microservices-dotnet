@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.11" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.Seq" Version="8.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="8.0.1" />
+    <PackageReference Include="Consul" Version="1.7.14.3" />
+    <PackageReference Include="Neo4j.Driver" Version="5.26.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Controllers\*.cs" Link="Controllers\%(Filename)%(Extension)" />
+    <Compile Include="..\..\Data\SocDbContext.cs" Link="Data\SocDbContext.cs" />
+    <Compile Include="..\..\Models\*.cs" Link="Models\%(Filename)%(Extension)" />
+    <Compile Include="..\..\Services\*.cs" Link="Services\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

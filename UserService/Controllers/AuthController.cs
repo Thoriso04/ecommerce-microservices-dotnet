@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Ecommerce.Security;
 using UserService.Data;
 using UserService.Models;
 using UserService.Services;
@@ -13,12 +14,14 @@ public class AuthController : ControllerBase
     private readonly UserDbContext _db;
     private readonly TokenService _tokenService;
     private readonly ILogger<AuthController> _logger;
+    private readonly SecurityEventPublisher _eventPublisher;
 
-    public AuthController(UserDbContext db, TokenService tokenService, ILogger<AuthController> logger)
+    public AuthController(UserDbContext db, TokenService tokenService, ILogger<AuthController> logger, SecurityEventPublisher eventPublisher)
     {
         _db = db;
         _tokenService = tokenService;
         _logger = logger;
+        _eventPublisher = eventPublisher;
     }
 
     [HttpPost("register")]
@@ -40,6 +43,8 @@ public class AuthController : ControllerBase
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
+        await _eventPublisher.PublishAsync("USER_REGISTERED", "LOW", "user-service", $"New user registered: {user.Username}", userId: user.Username);
+
         _logger.LogInformation("New user registered: {Username} ({UserId})", user.Username, user.Id);
         return CreatedAtAction(nameof(GetById), new { id = user.Id }, new { user.Id, user.Username });
     }
@@ -51,11 +56,13 @@ public class AuthController : ControllerBase
         if (user == null || !BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
         {
             _logger.LogWarning("Failed login attempt for username {Username}", req.Username);
+            await _eventPublisher.PublishAsync("AUTH_FAILED", "MEDIUM", "user-service", $"Failed login attempt for username {req.Username}", userId: req.Username);
             return Unauthorized(new { message = "Invalid credentials" });
         }
 
         var token = _tokenService.GenerateToken(user);
         _logger.LogInformation("User {Username} logged in successfully", user.Username);
+        await _eventPublisher.PublishAsync("AUTH_SUCCESS", "LOW", "user-service", $"User {user.Username} logged in successfully", userId: user.Username);
         return Ok(new AuthResponse(token, user.Id, user.Username, user.Role));
     }
 
