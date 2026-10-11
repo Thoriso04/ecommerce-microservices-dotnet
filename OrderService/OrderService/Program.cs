@@ -3,7 +3,7 @@ using Consul;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Ecommerce.Security;
+using OrderService.Services;
 using OrderService.Data;
 using OrderService.Services;
 using Polly;

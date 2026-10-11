@@ -1,4 +1,4 @@
-using Ecommerce.Security;
+using ProductService.Services;
 
 namespace ProductService.Middleware;
 
@@ -17,7 +17,7 @@ public class SecurityEventMiddleware
                 "UNAUTHORISED_ACCESS", "MEDIUM", "product-service",
                 $"Unauthorised access attempt on {context.Request.Path}",
                 sourceIp: context.Connection.RemoteIpAddress?.ToString(),
-                endpoint: context.Request.Path.Value,
+                endpoint: context.Request.Path,
                 httpMethod: context.Request.Method,
                 statusCode: context.Response.StatusCode);
         }

@@ -16,11 +16,4 @@
     <PackageReference Include="Neo4j.Driver" Version="5.26.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Include="..\..\Controllers\*.cs" Link="Controllers\%(Filename)%(Extension)" />
-    <Compile Include="..\..\Data\SocDbContext.cs" Link="Data\SocDbContext.cs" />
-    <Compile Include="..\..\Models\*.cs" Link="Models\%(Filename)%(Extension)" />
-    <Compile Include="..\..\Services\*.cs" Link="Services\%(Filename)%(Extension)" />
-  </ItemGroup>
-
 </Project>

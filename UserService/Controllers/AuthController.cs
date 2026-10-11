@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Ecommerce.Security;
 using UserService.Data;
 using UserService.Models;
 using UserService.Services;

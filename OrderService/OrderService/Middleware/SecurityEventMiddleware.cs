@@ -1,4 +1,4 @@
-using Ecommerce.Security;
+using OrderService.Services;
 
 namespace OrderService.Middleware;
 
@@ -17,7 +17,7 @@ public class SecurityEventMiddleware
                 "UNAUTHORISED_ACCESS", "MEDIUM", "order-service",
                 $"Unauthorised access attempt on {context.Request.Path}",
                 sourceIp: context.Connection.RemoteIpAddress?.ToString(),
-                endpoint: context.Request.Path.Value,
+                endpoint: context.Request.Path,
                 httpMethod: context.Request.Method,
                 statusCode: context.Response.StatusCode);
         }

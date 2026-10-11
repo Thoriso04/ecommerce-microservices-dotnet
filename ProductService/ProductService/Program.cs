@@ -3,7 +3,6 @@ using Consul;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Ecommerce.Security;
 using ProductService.Data;
 using ProductService.Middleware;
 using Serilog;
@@ -22,7 +21,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ProductDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("ProductDb")));
 
-builder.Services.AddHttpClient<SecurityEventPublisher>(client =>
+builder.Services.AddHttpClient("SecurityEventPublisher", client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["Services:SocEventService"] ?? "http://soc-event-service:8080");
 });
@@ -51,16 +50,13 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();
 }
 
-app.UseSerilogRequestLogging();
-app.UseSwagger();
-app.UseSwaggerUI();
 app.UseMiddleware<SecurityEventMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-app.UseMiddleware<ProductService.Middleware.SecurityEventMiddleware>(); 
+app.UseMiddleware<ProductService.Middleware.SecurityEventMiddleware>();
 
 var consulAddress = builder.Configuration["Consul:Address"] ?? "http://consul:8500";
 var consulClient = new ConsulClient(c => c.Address = new Uri(consulAddress));
