@@ -122,8 +122,17 @@ services:
     environment:
       - NEO4J_AUTH=neo4j/password123
       - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_server_memory_heap_initial__size=400m
+      - NEO4J_server_memory_heap_max__size=400m
+      - NEO4J_server_memory_pagecache_size=128m
     ports: ["7474:7474", "7687:7687"]
     volumes: ["neo4j_data:/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -O /dev/null -q http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
 
   soc-db:
     image: postgres:16
@@ -147,7 +156,7 @@ services:
       soc-db:
         condition: service_healthy
       neo4j:
-        condition: service_started
+        condition: service_healthy
       consul:
         condition: service_started
       seq:
@@ -162,5 +171,3 @@ volumes:
   order_db_data:
   neo4j_data:
   soc_db_data:
-
-  

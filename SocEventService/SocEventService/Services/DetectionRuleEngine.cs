@@ -41,11 +41,13 @@ public class DetectionRuleEngine : BackgroundService
     private async Task RunFailedLoginRule(SocDbContext db, GraphService graph)
     {
         var window = DateTime.UtcNow.AddMinutes(-5);
-        var groups = await db.Events
+        var groups = (await db.Events
             .Where(e => e.EventType == "AUTH_FAILED" && e.Timestamp >= window)
+            .ToListAsync())
             .GroupBy(e => e.UserId)
             .Where(g => g.Count() >= 5)
-            .ToListAsync();
+            .ToList();
+            
 
         foreach (var g in groups)
         {
@@ -78,11 +80,12 @@ public class DetectionRuleEngine : BackgroundService
     private async Task RunUnauthorizedAccessRule(SocDbContext db, GraphService graph)
     {
         var window = DateTime.UtcNow.AddMinutes(-5);
-        var groups = await db.Events
+        var groups = (await db.Events
             .Where(e => e.EventType == "UNAUTHORISED_ACCESS" && e.Timestamp >= window)
+            .ToListAsync())
             .GroupBy(e => new { e.UserId, e.SourceIp })
             .Where(g => g.Count() >= 3)
-            .ToListAsync();
+            .ToList();
 
         foreach (var g in groups)
         {
@@ -115,11 +118,12 @@ public class DetectionRuleEngine : BackgroundService
     private async Task RunServiceFailureRule(SocDbContext db, GraphService graph)
     {
         var window = DateTime.UtcNow.AddMinutes(-5);
-        var groups = await db.Events
+        var groups = (await db.Events
             .Where(e => (e.EventType == "SERVICE_ERROR" || e.EventType == "SERVICE_HEALTH_FAILED") && e.Timestamp >= window)
+            .ToListAsync())
             .GroupBy(e => e.ServiceName)
             .Where(g => g.Count() >= 3)
-            .ToListAsync();
+            .ToList();
 
         foreach (var g in groups)
         {
@@ -151,11 +155,12 @@ public class DetectionRuleEngine : BackgroundService
     private async Task RunAbnormalRequestRateRule(SocDbContext db, GraphService graph)
     {
         var window = DateTime.UtcNow.AddMinutes(-1);
-        var groups = await db.Events
+        var groups = (await db.Events
             .Where(e => e.EventType == "API_REQUEST" && e.Timestamp >= window)
+            .ToListAsync())
             .GroupBy(e => e.SourceIp)
             .Where(g => g.Count() >= 50)
-            .ToListAsync();
+            .ToList();
 
         foreach (var g in groups)
         {
