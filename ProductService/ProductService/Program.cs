@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ProductService.Data;
 using ProductService.Middleware;
+using ProductService.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +42,10 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("ProductDb")!, name: "product_db");
+builder.Services.AddHttpClient<SecurityEventPublisher>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Services:SocEventService"] ?? "http://soc-event-service:8080");
+});
 
 var app = builder.Build();
 
@@ -56,7 +61,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
-app.UseMiddleware<ProductService.Middleware.SecurityEventMiddleware>();
+app.UseMiddleware<SecurityEventMiddleware>();
 
 var consulAddress = builder.Configuration["Consul:Address"] ?? "http://consul:8500";
 var consulClient = new ConsulClient(c => c.Address = new Uri(consulAddress));
